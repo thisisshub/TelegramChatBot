@@ -1,6 +1,6 @@
 import json, requests, time, urllib
 
-TOKEN = ""
+TOKEN = "2147462221:AAGzN2XbviUM8D2V6dha-r6dI9TrQ0VZXLI"
 URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
 
@@ -47,6 +47,17 @@ def get_updates(offset=None):
         url += "?offset={}".format(offset)
     js = get_json_from_url(url)
     return js
+
+
+def echo_all(updates):
+    """Send an echo reply for each message that we receive"""
+    for update in updates["result"]:
+        try:
+            text = update["message"]["text"]
+            chat = update["message"]["chat"]["id"]
+            send_message(text, chat)
+        except Exception as e:
+            print(e)
 
 
 def main():
