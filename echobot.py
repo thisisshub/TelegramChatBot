@@ -40,6 +40,14 @@ def send_message(text, chat_id):
     get_url(url)
 
 
+def get_updates(offset=None):
+    url = URL + "getUpdates"
+    if offset:
+        url += "?offset={}".format(offset)
+    js = get_json_from_url(url)
+    return js
+
+
 def main():
     last_textchat = (None, None)
     while True:
