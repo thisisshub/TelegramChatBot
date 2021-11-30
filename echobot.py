@@ -1,3 +1,4 @@
+from db import DB
 import json, requests, time, urllib
 
 TOKEN = "2147462221:AAGzN2XbviUM8D2V6dha-r6dI9TrQ0VZXLI"
@@ -48,16 +49,21 @@ def get_updates(offset=None):
     js = get_json_from_url(url)
     return js
 
+db = DB()
 
-def echo_all(updates):
-    """Send an echo reply for each message that we receive"""
+def handle_updates(updates):
     for update in updates["result"]:
-        try:
-            text = update["message"]["text"]
-            chat = update["message"]["chat"]["id"]
-            send_message(text, chat)
-        except Exception as e:
-            print(e)
+        text = update["message"]["text"]
+        chat = update["message"]["chat"]["id"]
+        items = db.get_items()
+        if text in items:
+            db.delete_item(text)
+            items = db.get_items()
+        else:
+            db.add_item(text)
+            items = db.get_items()
+        message = "\n".join(items)
+        send_message(message, chat)
 
 
 def get_last_update_id(updates):
@@ -69,12 +75,13 @@ def get_last_update_id(updates):
 
 
 def main():
+    db.setup()
     last_update_id = None
     while True:
         updates = get_updates(last_update_id)
         if len(updates["result"]) > 0:
             last_update_id = get_last_update_id(updates) + 1
-            echo_all(updates)
+            handle_updates(updates)
         time.sleep(0.5)
 
 
